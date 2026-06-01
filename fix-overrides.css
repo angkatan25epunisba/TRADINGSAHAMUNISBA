@@ -1,0 +1,366 @@
+/* ═══════════════════════════════════════════════════════
+   FIX PATCH 4 — CSS OVERRIDE
+   fix-overrides.css
+   
+   CARA PAKAI:
+     Tambahkan di dalam <head> index.html, SETELAH style.css:
+     <link rel="stylesheet" href="fix-overrides.css">
+   
+   ATAU tambahkan konten ini langsung di akhir style.css
+   ═══════════════════════════════════════════════════════ */
+
+
+/* ═══════════════════════════════════════════════════════
+   §1. BANK INDONESIA CHART — HEIGHT CHAIN FIX
+   
+   MASALAH:
+   - Inline style height:400px di bank-chart-canvas-wrap 
+     konflik dengan CSS flex chain
+   - Canvas tidak mengisi container dengan benar
+   - Chart tertarik ke atas, tidak center vertikal
+   
+   SOLUSI:
+   - Hapus height yang conflicting, gunakan flex:1 1 0
+   - Canvas pakai position:absolute untuk isi container
+   ═══════════════════════════════════════════════════════ */
+
+/* Pastikan dashboard-content punya height yang tepat */
+.dashboard-content {
+  height: calc(100vh - 124px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Panel view harus full height */
+.panel-view.active {
+  display: flex !important;
+  height: 100% !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Bank view full height */
+#bank-view {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Flex row utama bank view */
+#bank-view > div {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+}
+
+/* Main column di bank view */
+#bank-view > div > main {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* CRITICAL FIX: Canvas wrap — flex:1 dengan height:0 */
+/* Ini adalah pola standar untuk flex children yang perlu "grow" */
+.bank-chart-canvas-wrap {
+  flex: 1 1 0 !important;    /* grow + shrink + basis 0 */
+  height: 0 !important;      /* CRITICAL: height:0 + flex:1 = mengambil ruang yang ada */
+  min-height: 280px !important;
+  max-height: 520px !important;
+  overflow: hidden !important;
+  position: relative !important;
+  padding: 12px 12px 8px 12px !important;
+  box-sizing: border-box !important;
+}
+
+/* Canvas mengisi wrap via absolute positioning */
+/* Ini LEBIH STABIL dari width/height:100% untuk canvas */
+#bank-chart-canvas {
+  position: absolute !important;
+  top: 12px !important;
+  left: 12px !important;
+  right: 12px !important;
+  bottom: 8px !important;
+  width: calc(100% - 24px) !important;
+  height: calc(100% - 20px) !important;
+  cursor: crosshair !important;
+  display: block !important;
+}
+
+/* Scroll wrap: tidak boleh shrink */
+#bank-scroll-wrap {
+  flex-shrink: 0 !important;
+}
+
+/* Bank list items: flex grow */
+#bank-list-items {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
+
+/* Order book body: flex grow */
+#bank-order-book-body {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
+
+/* Header bank: tidak boleh shrink */
+#bank-chart-header {
+  flex-shrink: 0 !important;
+}
+
+/* Disclaimer: tidak boleh shrink */
+#bank-view > div > main > div:last-child {
+  flex-shrink: 0 !important;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .bank-chart-canvas-wrap {
+    min-height: 220px !important;
+    max-height: 50vw !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .bank-chart-canvas-wrap {
+    min-height: 180px !important;
+    max-height: 55vw !important;
+  }
+  #bank-order-book-panel {
+    display: none !important;
+  }
+  #bank-trade-panel {
+    display: none !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   §2. TRADING CHART — KONSISTENSI DENGAN BANK CHART
+   
+   Pastikan trading chart juga punya height chain yang sama
+   ═══════════════════════════════════════════════════════ */
+
+/* Trading view full height */
+#trade-view {
+  height: 100%;
+  min-height: 0;
+}
+
+/* Chart canvas wrap — sama dengan bank */
+.chart-canvas-wrap {
+  flex: 1 1 0 !important;
+  height: 0 !important;
+  min-height: 300px !important;
+  max-height: 520px !important;
+  overflow: hidden !important;
+  position: relative !important;
+  padding: 12px !important;
+  box-sizing: border-box !important;
+}
+
+#main-chart {
+  position: absolute !important;
+  top: 12px !important;
+  left: 12px !important;
+  right: 12px !important;
+  bottom: 8px !important;
+  width: calc(100% - 24px) !important;
+  height: calc(100% - 20px) !important;
+  cursor: crosshair !important;
+  display: block !important;
+}
+
+@media (max-width: 900px) {
+  .chart-canvas-wrap {
+    min-height: 220px !important;
+    max-height: 50vw !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   §3. BERITA KEUANGAN — UI IMPROVEMENTS
+   ═══════════════════════════════════════════════════════ */
+
+/* Berita view scroll */
+#berita-view {
+  overflow-y: auto !important;
+  scroll-behavior: smooth;
+}
+
+/* Kartu berita real highlight */
+#berita-grid a[href*="google.com/search"],
+#berita-grid a[href*="cnbcindonesia.com"],
+#berita-grid a[href*="bloomberg.com"],
+#berita-grid a[href*="reuters.com"] {
+  /* Slight highlight untuk berita yang punya URL real */
+}
+
+/* Badge "REAL" di kartu berita */
+#berita-grid .real-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+/* Filter bar scroll horizontal */
+#berita-filter-bar {
+  overflow-x: auto;
+  flex-wrap: nowrap !important;
+  scrollbar-width: thin;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+#berita-filter-bar::-webkit-scrollbar {
+  height: 3px;
+}
+
+#berita-filter-bar::-webkit-scrollbar-thumb {
+  background: rgba(212,175,55,0.3);
+  border-radius: 2px;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   §4. ORDER BOOK — DEPTH VISUALIZATION
+   
+   Perbaiki visual depth bars di order book
+   ═══════════════════════════════════════════════════════ */
+
+.ob-row {
+  position: relative;
+  overflow: hidden;
+}
+
+.ob-row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: var(--depth, 0%);
+  opacity: 0.1;
+  pointer-events: none;
+  transition: width 0.2s ease;
+}
+
+.ob-row.ask::before { background: #FF3D71; }
+.ob-row.bid::before { background: #00E676; }
+
+.ob-row:hover {
+  background: rgba(255,255,255,0.03) !important;
+  cursor: pointer;
+}
+
+/* Bank order book rows */
+#bank-order-book-body .ob-row {
+  position: relative;
+}
+
+#bank-order-book-body .ob-row::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; right: 0;
+  width: var(--depth, 0%);
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+#bank-order-book-body .ob-row.ask::before { background: #FF3D71; }
+#bank-order-book-body .ob-row.bid::before { background: #00E676; }
+
+
+/* ═══════════════════════════════════════════════════════
+   §5. GENERAL UI POLISH
+   ═══════════════════════════════════════════════════════ */
+
+/* Smooth transitions untuk semua panel switches */
+.panel-view {
+  transition: opacity 0.15s ease;
+}
+
+/* Topbar balance — highlight saat update */
+@keyframes balanceFlash {
+  0%   { color: var(--gold); }
+  50%  { color: #fff; text-shadow: 0 0 8px rgba(212,175,55,0.8); }
+  100% { color: var(--gold); }
+}
+
+.balance-update {
+  animation: balanceFlash 0.4s ease;
+}
+
+/* Chart zoom label */
+#chart-zoom-label,
+#bank-zoom-label {
+  min-width: 28px;
+  text-align: center;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scrollbar global — thin and styled */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* Hot stocks panel */
+#hot-stocks-panel {
+  max-height: 200px;
+  overflow: hidden;
+}
+
+/* Market status widget */
+#market-status-widget {
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.06em;
+  transition: all 0.3s;
+  white-space: nowrap;
+  border: 1px solid currentColor;
+  opacity: 0.9;
+}
+
+/* Keyboard shortcut hint */
+#kb-shortcut-hint {
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+#kb-shortcut-hint:hover {
+  opacity: 1;
+}
+
+/* Loading state untuk berita */
+#berita-grid .loading-skeleton {
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeletonLoad 1.5s ease infinite;
+  border-radius: 14px;
+  min-height: 160px;
+}
+
+@keyframes skeletonLoad {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

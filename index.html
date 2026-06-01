@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNISBA Virtual Market — Elite Trading Platform</title>
+  <meta name="description" content="Platform simulasi pasar saham virtual berbasis program studi UNISBA. Trading prodi favorit Anda!" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- Firebase SDKs (Realtime Database — gratis tanpa billing) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     PARTICLE BACKGROUND
+     ═══════════════════════════════════════════════════ -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- ═══════════════════════════════════════════════════
+     LOADING SCREEN
+     ═══════════════════════════════════════════════════ -->
+<div id="loading-screen">
+  <div class="loading-logo">
+    <div class="loading-logo-icon">
+      <div class="loading-logo-ring"></div>
+      <div class="loading-logo-inner">U</div>
+    </div>
+    <div class="loading-title">UNISBA<span style="color:var(--cyan)">VM</span></div>
+    <div class="loading-subtitle">Virtual Market Platform</div>
+  </div>
+  <div>
+    <div class="loading-bar-wrap">
+      <div class="loading-bar" id="loading-bar"></div>
+    </div>
+  </div>
+  <div class="loading-status" id="loading-status">Menginisialisasi sistem…</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     TOAST CONTAINER
+     ═══════════════════════════════════════════════════ -->
+<div class="toast-container"></div>
+
+<!-- ═══════════════════════════════════════════════════
+     LANDING PAGE
+     ═══════════════════════════════════════════════════ -->
+<div id="landing-page" class="hidden">
+
+  <!-- Nav -->
+  <nav class="landing-nav">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-mark">U</div>
+      <div class="nav-logo-text">UNISBA<span>VM</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Fitur</a></li>
+      <li><a href="#markets">Markets</a></li>
+      <li><a href="#about">Tentang</a></li>
+    </ul>
+    <div class="nav-cta">
+      <button class="btn btn-ghost" id="btn-go-auth-login">Masuk</button>
+      <button class="btn btn-gold" onclick="document.getElementById('btn-enter-market').click()">Daftar Gratis</button>
+    </div>
+  </nav>
+
+  <!-- Ticker Tape -->
+  <div class="ticker-wrap">
+    <div class="ticker-track" id="landing-ticker-track"></div>
+  </div>
+
+  <!-- Hero -->
+  <section class="landing-hero" id="features">
+    <div class="hero-badge">🏛️ Universitas Islam Bandung · Simulasi Pasar Virtual</div>
+
+    <h1 class="hero-title">
+      <div class="line-1">UNISBA</div>
+      <div class="line-2">VIRTUAL MARKET</div>
+    </h1>
+
+    <p class="hero-tagline">Elite Simulation Trading Platform</p>
+
+    <p class="hero-desc">
+      Platform simulasi perdagangan saham virtual pertama berbasis program studi UNISBA.
+      Investasikan modal virtual Anda, analisis pergerakan harga, dan buktikan diri sebagai trader terbaik kampus.
+    </p>
+
+    <div class="hero-cta">
+      <a href="#" class="btn-enter" id="btn-enter-market">
+        Masuk Pasar <span class="arrow">→</span>
+      </a>
+      <button class="btn btn-ghost" style="font-size:14px;padding:13px 28px">
+        Lihat Demo
+      </button>
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <div class="landing-stats">
+    <div class="stat-item">
+      <div class="stat-value">12+</div>
+      <div class="stat-label">Saham Program Studi</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">Rp10JT</div>
+      <div class="stat-label">Modal Awal Virtual</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">Real-Time</div>
+      <div class="stat-label">Simulasi Harga Langsung</div>
+    </div>
+  </div>
+
+  <!-- Features section -->
+  <section style="padding:80px 40px;max-width:1100px;margin:0 auto;width:100%" id="markets">
+    <div style="text-align:center;margin-bottom:48px">
+      <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.25em;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Fitur Unggulan</div>
+      <h2 style="font-family:var(--font-display);font-size:36px;font-weight:700;color:var(--text-primary)">Pengalaman Trading<br><span style="background:linear-gradient(135deg,var(--gold),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Berkelas Profesional</span></h2>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+      <!-- Feature cards -->
+      <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:28px;transition:border-color 0.3s" onmouseover="this.style.borderColor='var(--gold-dim)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
+        <div style="font-size:32px;margin-bottom:16px">📊</div>
+        <h3 style="font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--text-primary);margin-bottom:8px">Chart Real-Time</h3>
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">Visualisasi pergerakan harga saham prodi secara live dengan chart animasi berkualitas profesional.</p>
+      </div>
+
+      <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:28px;transition:border-color 0.3s" onmouseover="this.style.borderColor='var(--cyan-dim)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
+        <div style="font-size:32px;margin-bottom:16px">💼</div>
+        <h3 style="font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--text-primary);margin-bottom:8px">Portofolio Cerdas</h3>
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">Kelola kepemilikan saham, pantau profit/loss, dan analisis kinerja investasi virtual Anda.</p>
+      </div>
+
+      <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:28px;transition:border-color 0.3s" onmouseover="this.style.borderColor='var(--gold-dim)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
+        <div style="font-size:32px;margin-bottom:16px">📰</div>
+        <h3 style="font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--text-primary);margin-bottom:8px">Berita Kampus</h3>
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">Berita simulasi seputar prestasi prodi mempengaruhi harga saham secara algoritmis dan otomatis.</p>
+      </div>
+
+      <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:28px;transition:border-color 0.3s" onmouseover="this.style.borderColor='var(--gold-dim)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
+        <div style="font-size:32px;margin-bottom:16px">🏆</div>
+        <h3 style="font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--text-primary);margin-bottom:8px">Leaderboard</h3>
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">Bersaing dengan sesama mahasiswa UNISBA. Siapa yang paling jago analisis pasar virtual?</p>
+      </div>
+
+      <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:28px;transition:border-color 0.3s" onmouseover="this.style.borderColor='var(--cyan-dim)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
+        <div style="font-size:32px;margin-bottom:16px">🔐</div>
+        <h3 style="font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--text-primary);margin-bottom:8px">Firebase Auth</h3>
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">Login aman dengan akun Google atau email. Data portofolio tersimpan cloud via Firestore.</p>
+      </div>
+
+      <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:28px;transition:border-color 0.3s" onmouseover="this.style.borderColor='var(--gold-dim)'" onmouseout="this.style.borderColor='var(--border-subtle)'">
+        <div style="font-size:32px;margin-bottom:16px">⚡</div>
+        <h3 style="font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--text-primary);margin-bottom:8px">UI Premium</h3>
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6">Desain glassmorphism dark-mode ala terminal Bloomberg/Binance dengan animasi smooth premium.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="border-top:1px solid var(--border-subtle);padding:32px 40px;display:flex;justify-content:space-between;align-items:center" id="about">
+    <div style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text-primary)">UNISBA<span style="color:var(--gold)">VM</span></div>
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase">⚠️ SIMULASI SAJA — Bukan platform investasi nyata</div>
+    <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">© 2025 UNISBA Virtual Market</div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     AUTH PAGE
+     ═══════════════════════════════════════════════════ -->
+<div id="auth-page" class="hidden">
+  <div class="auth-card">
+
+    <!-- Close / Back button -->
+    <button class="auth-close-btn" id="btn-auth-close" title="Kembali ke halaman utama">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <div class="auth-logo">
+      <div class="auth-logo-mark">U</div>
+      <div class="auth-title">UNISBA Virtual Market</div>
+      <div class="auth-subtitle">Masuk atau daftar untuk mulai trading virtual</div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="auth-login-tab">Masuk</button>
+      <button class="auth-tab" id="auth-reg-tab">Daftar</button>
+    </div>
+
+    <!-- Error -->
+    <div class="auth-error" id="auth-error"></div>
+
+    <!-- Login Form -->
+    <div id="login-form">
+
+      <!-- Demo banner: tampil jika Firebase belum dikonfigurasi -->
+      <div id="demo-mode-banner" class="demo-banner hidden">
+        <span class="demo-banner-icon">⚡</span>
+        <div>
+          <div class="demo-banner-title">Mode Demo — Firebase belum dikonfigurasi</div>
+          <div class="demo-banner-desc">Login Google &amp; email tidak tersedia. Gunakan tombol Demo di bawah.</div>
+        </div>
+      </div>
+
+      <!-- Google Login: disembunyikan via JS kalau Firebase belum siap -->
+      <div id="google-login-section">
+        <button class="btn-google" id="btn-google-login" onclick="handleGoogleLogin()">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/><path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/><path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/><path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/></svg>
+          Lanjutkan dengan Google
+        </button>
+        <div class="auth-divider">
+          <div class="auth-divider-line"></div>
+          <div class="auth-divider-text">atau</div>
+          <div class="auth-divider-line"></div>
+        </div>
+      </div>
+
+      <!-- Email/password fields: disembunyikan via JS kalau Firebase belum siap -->
+      <div id="email-login-section">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="login-email" placeholder="nama@unisba.ac.id" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <button class="btn btn-gold btn-full" onclick="handleLogin()" style="margin-top:4px">
+          Masuk ke Platform
+        </button>
+      </div>
+
+      <div style="margin-top:16px;text-align:center">
+        <button class="btn btn-ghost" style="font-size:12px;padding:6px 16px;color:var(--text-muted)" onclick="enterDemoMode()">
+          🚀 Coba Demo (tanpa login)
+        </button>
+      </div>
+    </div>
+
+    <!-- Register Form -->
+    <div id="register-form" class="hidden">
+      <div class="form-group">
+        <label class="form-label">Nama Lengkap</label>
+        <input type="text" class="form-input" id="reg-name" placeholder="Nama Anda" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input type="email" class="form-input" id="reg-email" placeholder="nama@unisba.ac.id" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-input" id="reg-password" placeholder="Minimal 6 karakter" autocomplete="new-password" />
+      </div>
+
+      <button class="btn btn-gold btn-full" onclick="handleRegister()" style="margin-top:4px">
+        Buat Akun — Rp10.000.000 Modal Gratis
+      </button>
+    </div>
+
+    <div style="margin-top:20px;text-align:center;font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:0.05em">
+      ⚠️ Platform simulasi — tidak ada uang nyata
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     DASHBOARD PAGE
+     ═══════════════════════════════════════════════════ -->
+<div id="dashboard-page" style="display:none;flex-direction:column;min-height:100vh;position:relative;z-index:1">
+
+  <!-- ─── Top Bar ─── -->
+  <header class="topbar">
+    <a href="#" class="topbar-logo" onclick="return false">
+      <div class="topbar-logo-mark">U</div>
+      <div class="topbar-logo-text">UNISBA<span>VM</span></div>
+    </a>
+
+    <div class="topbar-divider"></div>
+
+    <div class="topbar-market-status">
+      <div class="market-dot"></div>
+      Pasar Buka
+    </div>
+
+    <div class="topbar-time" id="topbar-time">00:00:00</div>
+
+    <div class="topbar-spacer"></div>
+
+    <div class="topbar-user">
+      <div class="user-balance-wrap">
+        <div class="user-balance-label">Total Aset</div>
+        <div class="user-balance-value" id="topbar-balance">Rp 10.000.000</div>
+      </div>
+
+      <div class="topbar-divider"></div>
+
+      <span style="font-size:12px;color:var(--text-secondary)" id="user-display-name">Trader</span>
+
+      <div class="user-avatar" id="user-avatar">T</div>
+
+      <button class="btn btn-danger" style="padding:6px 14px;font-size:11px" id="btn-logout">Keluar</button>
+    </div>
+  </header>
+
+  <!-- ─── Market News Bar (di bawah topbar) ─── -->
+  <div id="market-news-bar" style="
+    background:rgba(212,175,55,0.06);
+    border-bottom:1px solid rgba(212,175,55,0.12);
+    display:flex;align-items:center;gap:0;
+    overflow:hidden;height:28px;flex-shrink:0;
+    position:relative;z-index:2;
+  ">
+    <div style="
+      flex-shrink:0;
+      padding:0 12px;
+      font-family:var(--font-mono);font-size:9px;
+      letter-spacing:0.18em;color:var(--gold);
+      text-transform:uppercase;
+      border-right:1px solid rgba(212,175,55,0.2);
+      height:100%;display:flex;align-items:center;
+      background:rgba(212,175,55,0.08);
+    ">📢 BERITA</div>
+    <div style="flex:1;overflow:hidden;position:relative;">
+      <div id="topbar-news-scroll" style="
+        display:inline-block;
+        white-space:nowrap;
+        font-family:var(--font-mono);font-size:10px;
+        color:var(--text-secondary);
+        animation:tickerScroll 40s linear infinite;
+        padding-left:40px;
+      ">Memuat berita pasar terbaru…</div>
+    </div>
+  </div>
+
+  <!-- ─── Nav Tabs ─── -->
+  <nav class="dashboard-nav">
+    <button class="nav-tab active" data-tab="trade">📊 Trading</button>
+    <button class="nav-tab" data-tab="portfolio">💼 Portofolio</button>
+    <button class="nav-tab" data-tab="leaderboard">🏆 Leaderboard</button>
+    <button class="nav-tab" data-tab="learn">📚 Belajar</button>
+    <button class="nav-tab" data-tab="community">💬 Komunitas<span id="community-notif-badge" style="display:none;color:var(--green);font-size:10px;margin-left:3px">●</span></button>
+    <button class="nav-tab" data-tab="berita">📰 Berita Keuangan</button>
+    <button class="nav-tab" onclick="openBinaryModal()" style="background:linear-gradient(135deg,rgba(0,230,118,0.15),rgba(255,61,113,0.15));border-color:rgba(0,230,118,0.3)">⚡ UP/DOWN</button>
+    <button class="nav-tab" onclick="openAIMentor()" style="background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(0,229,255,0.15));border-color:rgba(212,175,55,0.3)">🤖 AI Mentor</button>
+  </nav>
+
+  <!-- ─── Dashboard Content ─── -->
+  <div class="dashboard-content">
+
+    <!-- ═══ TRADE VIEW ═══ -->
+    <div class="panel-view active trading-view" id="trade-view">
+
+      <!-- Left: Stock List -->
+      <aside class="stock-list-panel">
+        <div class="panel-header">
+          <div class="panel-title">Pasar Saham</div>
+          <div class="panel-title-badge" id="stock-count-badge">12</div>
+        </div>
+        <div class="stock-search">
+          <input type="text" id="stock-search-input" placeholder="Cari prodi…" />
+        </div>
+        <div class="stock-list" id="stock-list-items">
+          <!-- Populated by JS -->
+        </div>
+      </aside>
+
+      <!-- Center: Chart -->
+      <main class="chart-area">
+        <div class="chart-header">
+          <div class="chart-symbol">
+            <div class="chart-symbol-icon" id="chart-symbol-icon" style="width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:13px;font-weight:700">EK</div>
+            <div>
+              <div class="chart-symbol-name" id="chart-symbol-name">EKOP</div>
+              <div class="chart-symbol-full" id="chart-symbol-full">Ekonomi Pembangunan · FEB</div>
+            </div>
+          </div>
+          <div class="chart-price-display">
+            <div class="chart-current-price" id="chart-current-price">Rp 0</div>
+            <div class="chart-price-change up" id="chart-price-change">+0.00%</div>
+          </div>
+          <div class="chart-stats">
+            <div class="chart-stat">
+              <div class="chart-stat-label">High</div>
+              <div class="chart-stat-value" id="chart-stat-hi">—</div>
+            </div>
+            <div class="chart-stat">
+              <div class="chart-stat-label">Low</div>
+              <div class="chart-stat-value" id="chart-stat-lo">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-timeframe">
+          <button class="tf-btn active" data-tf="1m">1M</button>
+          <button class="tf-btn" data-tf="5m">5M</button>
+          <button class="tf-btn" data-tf="15m">15M</button>
+          <button class="tf-btn" data-tf="1h">1H</button>
+          <button class="tf-btn" data-tf="1d">1D</button>
+          <div class="chart-tf-spacer"></div>
+          <!-- Indicator buttons -->
+          <div class="indicator-btns">
+            <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);margin-right:4px">IND</span>
+            <button class="ind-btn active" id="ind-btn-ma" title="Moving Average (MA20)" onclick="toggleIndicator('ma')">MA</button>
+            <button class="ind-btn active" id="ind-btn-ema" title="EMA 9" onclick="toggleIndicator('ema')">EMA</button>
+            <button class="ind-btn" id="ind-btn-rsi" title="RSI 14" onclick="toggleIndicator('rsi')">RSI</button>
+            <button class="ind-btn" id="ind-btn-macd" title="MACD" onclick="toggleIndicator('macd')">MACD</button>
+          </div>
+          <!-- Zoom controls -->
+          <div class="chart-zoom-group">
+            <button class="zoom-btn" id="zoom-out-btn" title="Zoom Out (tampilkan lebih banyak data)">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                <path d="M4 6h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <span class="zoom-label" id="zoom-label">1×</span>
+            <button class="zoom-btn" id="zoom-in-btn" title="Zoom In (tampilkan lebih sedikit data / detail)">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1.4"/>
+                <path d="M9.5 9.5L12.5 12.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+                <path d="M4 6h4M6 4v4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <button class="zoom-btn zoom-reset" id="zoom-reset-btn" title="Reset zoom">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2 7a5 5 0 1 0 1-3M2 2v3h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          <!-- Panel toggles -->
+          <div class="chart-panel-toggles">
+            <button class="panel-toggle-btn active" id="toggle-stock-list" title="Sembunyikan/tampilkan daftar saham">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <rect x="1" y="1" width="4" height="11" rx="1" stroke="currentColor" stroke-width="1.3"/>
+                <rect x="7" y="1" width="5" height="11" rx="1" stroke="currentColor" stroke-width="1.3"/>
+              </svg>
+            </button>
+            <button class="panel-toggle-btn active" id="toggle-trade-panel" title="Sembunyikan/tampilkan panel order">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <rect x="2" y="1" width="5" height="11" rx="1" stroke="currentColor" stroke-width="1.3"/>
+                <rect x="9" y="1" width="3" height="11" rx="1" stroke="currentColor" stroke-width="1.3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="chart-canvas-wrap">
+          <canvas id="main-chart" style="display:block;width:100%;height:100%"></canvas>
+        </div>
+
+        <!-- Binary Quick Trade Bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg-deep);border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle);gap:12px">
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--gold);letter-spacing:0.15em;text-transform:uppercase;white-space:nowrap">⚡ BINARY</div>
+          <button onclick="openBinaryModal()" style="
+            flex:1;padding:8px;border-radius:8px;font-family:var(--font-display);font-size:13px;font-weight:800;
+            cursor:pointer;border:1.5px solid var(--green);background:rgba(0,230,118,0.12);color:var(--green);
+            transition:all 0.15s;letter-spacing:0.05em;
+          " onmouseover="this.style.background='rgba(0,230,118,0.25)'" onmouseout="this.style.background='rgba(0,230,118,0.12)'">▲ NAIK</button>
+          <button onclick="openBinaryModal()" style="
+            padding:8px 12px;border-radius:8px;font-family:var(--font-mono);font-size:10px;
+            cursor:pointer;border:1px solid var(--border-subtle);background:var(--bg-card);color:var(--text-muted);
+          ">Buka</button>
+          <button onclick="openBinaryModal()" style="
+            flex:1;padding:8px;border-radius:8px;font-family:var(--font-display);font-size:13px;font-weight:800;
+            cursor:pointer;border:1.5px solid #FF3D71;background:rgba(255,61,113,0.12);color:#FF3D71;
+            transition:all 0.15s;letter-spacing:0.05em;
+          " onmouseover="this.style.background='rgba(255,61,113,0.25)'" onmouseout="this.style.background='rgba(255,61,113,0.12)'">▼ TURUN</button>
+        </div>
+
+        <div class="news-strip">
+          <div class="news-label">📢 NEWS</div>
+          <div class="news-ticker" id="news-ticker">Memuat berita pasar terbaru…</div>
+        </div>
+      </main>
+
+      <!-- Order Book Panel -->
+      <aside class="order-book-panel" id="order-book-panel">
+        <div class="panel-header" style="margin-bottom:8px">
+          <div class="panel-title" style="font-size:11px">📖 Order Book</div>
+          <div style="font-family:var(--font-mono);font-size:9px;color:var(--green)">● LIVE</div>
+        </div>
+        <div class="ob-header">
+          <span>Harga</span>
+          <span>Vol</span>
+          <span>Total</span>
+        </div>
+        <div id="order-book-body"></div>
+      </aside>
+
+            <!-- Right: Trade Panel -->
+      <aside class="trade-panel">
+
+        <!-- Trade Box -->
+        <div class="trade-box">
+          <div class="panel-header" style="margin-bottom:12px">
+            <div class="panel-title">Order Panel</div>
+          </div>
+
+          <div class="trade-tabs">
+            <button class="trade-tab buy active" id="trade-tab-buy">▲ BELI</button>
+            <button class="trade-tab sell" id="trade-tab-sell">▼ JUAL</button>
+          </div>
+
+          <!-- Balance / Owned -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+            <div style="background:var(--bg-deep);border-radius:6px;padding:8px 10px;border:1px solid var(--border-subtle)">
+              <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px">Saldo</div>
+              <div style="font-family:var(--font-mono);font-size:11px;color:var(--gold)" id="trade-balance">Rp 10.000.000</div>
+            </div>
+            <div style="background:var(--bg-deep);border-radius:6px;padding:8px 10px;border:1px solid var(--border-subtle)">
+              <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.1em;color:var(--text-muted);text-transform:uppercase;margin-bottom:3px">Dimiliki</div>
+              <div style="font-family:var(--font-mono);font-size:11px;color:var(--cyan)" id="trade-owned">0 lembar</div>
+            </div>
+          </div>
+
+          <!-- Quantity -->
+          <div class="trade-form-row">
+            <div class="trade-form-label">
+              <span>Jumlah Lembar</span>
+              <span class="trade-form-avail">Harga/lbr: <span id="trade-unit-price">Rp 0</span></span>
+            </div>
+            <input type="number" class="trade-input" id="trade-qty-input" placeholder="0" min="1" step="1" />
+            <div class="trade-pct-btns">
+              <button class="trade-pct-btn" data-pct="0.25">25%</button>
+              <button class="trade-pct-btn" data-pct="0.5">50%</button>
+              <button class="trade-pct-btn" data-pct="0.75">75%</button>
+              <button class="trade-pct-btn" data-pct="1">MAX</button>
+            </div>
+          </div>
+
+          <!-- Total -->
+          <div class="trade-total">
+            <div class="trade-total-label">Total Nilai Order</div>
+            <div class="trade-total-value" id="trade-total-value">Rp 0</div>
+          </div>
+
+          <!-- Submit -->
+          <button class="btn-buy-full" id="trade-submit-btn">▲ BELI SEKARANG</button>
+        </div>
+
+        <!-- Holdings Mini -->
+        <div class="holdings-mini">
+          <div class="holdings-mini-title">📂 Kepemilikan Saya</div>
+          <div id="holdings-mini-list">
+            <div style="color:var(--text-muted);font-size:11px;padding:4px 0">Belum ada kepemilikan saham.</div>
+          </div>
+        </div>
+
+
+        <!-- Price Alerts -->
+        <div class="alerts-panel">
+          <div class="panel-header" style="margin-bottom:10px;padding:0 0 10px 0;border-bottom:1px solid var(--border-subtle)">
+            <div class="panel-title">🔔 Price Alerts</div>
+            <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted)" id="alerts-count"></span>
+          </div>
+          <!-- Add alert form -->
+          <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+            <select id="alert-stock-sel" style="background:var(--bg-deep);border:1px solid var(--border-subtle);border-radius:6px;padding:6px 8px;color:var(--text-primary);font-family:var(--font-mono);font-size:10px;width:100%">
+              <option value="">Pilih Saham…</option>
+            </select>
+            <div style="display:flex;gap:6px">
+              <select id="alert-cond-sel" style="background:var(--bg-deep);border:1px solid var(--border-subtle);border-radius:6px;padding:6px 8px;color:var(--text-primary);font-family:var(--font-mono);font-size:10px;flex:1">
+                <option value="above">▲ Di atas</option>
+                <option value="below">▼ Di bawah</option>
+              </select>
+              <input type="number" id="alert-price-inp" placeholder="Harga" style="background:var(--bg-deep);border:1px solid var(--border-subtle);border-radius:6px;padding:6px 8px;color:var(--text-primary);font-family:var(--font-mono);font-size:10px;flex:2;outline:none" />
+            </div>
+            <button onclick="addPriceAlert()" style="background:rgba(0,229,255,0.12);border:1px solid var(--border-cyan);border-radius:6px;padding:6px;color:var(--cyan);font-family:var(--font-mono);font-size:10px;cursor:pointer;font-weight:600">+ Set Alert</button>
+          </div>
+          <div id="alerts-list"></div>
+        </div>
+
+        <!-- Open Limit Orders -->
+        <div class="alerts-panel" style="margin-top:12px">
+          <div class="panel-header" style="margin-bottom:10px;padding:0 0 10px 0;border-bottom:1px solid var(--border-subtle)">
+            <div class="panel-title">📋 Limit Orders</div>
+          </div>
+          <div id="limit-orders-list"></div>
+        </div>
+
+        <!-- News Panel -->
+        <div class="news-panel">
+          <div class="panel-header" style="margin-bottom:12px;padding:0 0 12px 0;border-bottom:1px solid var(--border-subtle)">
+            <div class="panel-title">📰 Berita Terkini</div>
+          </div>
+          <div id="news-panel-items">
+            <div style="color:var(--text-muted);font-size:11px">Menunggu berita terbaru…</div>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+    <!-- END TRADE VIEW -->
+
+    <!-- ═══ PORTFOLIO VIEW ═══ -->
+    <div class="panel-view portfolio-view" id="portfolio-view">
+
+      <!-- Summary Cards -->
+      <div class="portfolio-summary">
+        <div class="summary-card" style="--accent:var(--gold)">
+          <div class="summary-card-label">💰 Saldo Tunai</div>
+          <div class="summary-card-value" id="port-balance">Rp 10.000.000</div>
+          <div class="summary-card-sub">Modal tersedia untuk trading</div>
+        </div>
+        <div class="summary-card" style="--accent:var(--cyan)">
+          <div class="summary-card-label">📊 Nilai Portofolio</div>
+          <div class="summary-card-value" id="port-portfolio">Rp 0</div>
+          <div class="summary-card-sub">Nilai saham yang dimiliki</div>
+        </div>
+        <div class="summary-card" style="--accent:var(--neon-blue)">
+          <div class="summary-card-label">💎 Total Aset</div>
+          <div class="summary-card-value" id="port-total">Rp 10.000.000</div>
+          <div class="summary-card-sub">Saldo + nilai portofolio</div>
+        </div>
+        <div class="summary-card" style="--accent:var(--green)">
+          <div class="summary-card-label">📈 Profit / Loss</div>
+          <div class="summary-card-value" id="port-total-display" style="font-size:18px">—</div>
+          <div class="summary-card-pnl" id="port-pnl">+Rp 0 (0.00%)</div>
+        </div>
+      </div>
+
+      <!-- Holdings Table -->
+      <div class="portfolio-table-wrap">
+        <div class="table-header-row">
+          <div class="table-title">📂 Kepemilikan Saham</div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Saham</th>
+              <th>Lembar</th>
+              <th>Avg. Beli</th>
+              <th>Harga Kini</th>
+              <th>Nilai</th>
+              <th>P / L</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="holdings-table-body">
+            <tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px">Belum ada kepemilikan saham. Mulai trading sekarang!</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Transactions Table -->
+      <div class="portfolio-table-wrap">
+        <div class="table-header-row">
+          <div class="table-title">🔄 Riwayat Transaksi</div>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Tipe</th>
+              <th>Saham</th>
+              <th>Lembar</th>
+              <th>Harga</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="tx-table-body">
+            <tr><td colspan="6" style="text-align:center;color:var(--text-muted);padding:24px">Belum ada transaksi.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <!-- END PORTFOLIO VIEW -->
+
+    <!-- ═══ LEADERBOARD VIEW ═══ -->
+    <div class="panel-view leaderboard-view" id="leaderboard-view">
+
+      <div style="text-align:center;margin-bottom:8px">
+        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">🏆 PAPAN PERINGKAT</div>
+        <h2 style="font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--text-primary)">Top Traders UNISBA</h2>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:4px">Peringkat berdasarkan total nilai aset virtual</p>
+      </div>
+
+      <!-- Podium -->
+      <div class="leaderboard-podium" id="leaderboard-podium">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Full table -->
+      <div class="portfolio-table-wrap">
+        <div class="table-header-row">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="table-title">📋 Semua Trader</div>
+            <span id="lb-count-badge" style="font-family:var(--font-mono);font-size:9px;padding:2px 8px;border-radius:100px;background:var(--gold-glow);border:1px solid var(--gold-dim);color:var(--gold)"></span>
+            <span id="lb-source-badge" style="font-family:var(--font-mono);font-size:9px;padding:2px 8px;border-radius:100px;background:rgba(0,230,118,0.08);border:1px solid rgba(0,230,118,0.2);color:var(--green);display:none">🔴 LIVE</span>
+          </div>
+          <button class="btn btn-cyan" style="padding:5px 14px;font-size:11px" onclick="renderLeaderboard()">🔄 Refresh</button>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Trader</th>
+              <th>Total Aset</th>
+              <th>Profit / Loss</th>
+              <th>Return</th>
+            </tr>
+          </thead>
+          <tbody id="lb-table-body">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <div style="text-align:center;padding:16px 0;font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">
+        <span id="lb-footer-text">Data leaderboard LIVE dari Firebase · Diperbarui setiap transaksi</span>
+      </div>
+    </div>
+    <!-- END LEADERBOARD VIEW -->
+
+    <!-- ═══ LEARN VIEW ═══ -->
+    <div class="panel-view" id="learn-view" style="padding:24px;max-width:900px;margin:0 auto;width:100%">
+      <div style="text-align:center;margin-bottom:32px">
+        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">📚 PUSAT BELAJAR</div>
+        <h2 style="font-family:var(--font-display);font-size:24px;font-weight:700;color:var(--text-primary)">Materi Trading & Investasi</h2>
+        <p style="font-size:13px;color:var(--text-muted);margin-top:6px">Pelajari dasar-dasar trading saham sebelum terjun ke pasar nyata</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+
+        <!-- Card 1 -->
+        <div onclick="showLearnModal('saham')" style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:16px;padding:24px;cursor:pointer;transition:border-color 0.2s,transform 0.2s" onmouseover="this.style.borderColor='var(--gold-dim)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-subtle)';this.style.transform='translateY(0)'">
+          <div style="font-size:36px;margin-bottom:12px">📈</div>
+          <h3 style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Apa itu Saham?</h3>
+          <p style="font-size:12px;color:var(--text-muted);line-height:1.6">Pengertian saham, cara kerja pasar modal, dan mengapa orang berinvestasi saham.</p>
+          <div style="margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--gold)">▶ Baca Materi →</div>
+        </div>
+
+        <!-- Card 2 -->
+        <div onclick="showLearnModal('analisis')" style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:16px;padding:24px;cursor:pointer;transition:border-color 0.2s,transform 0.2s" onmouseover="this.style.borderColor='var(--cyan-dim)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-subtle)';this.style.transform='translateY(0)'">
+          <div style="font-size:36px;margin-bottom:12px">🔍</div>
+          <h3 style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Analisis Teknikal</h3>
+          <p style="font-size:12px;color:var(--text-muted);line-height:1.6">Membaca grafik, tren harga, support/resistance, dan indikator populer untuk keputusan trading.</p>
+          <div style="margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--cyan)">▶ Baca Materi →</div>
+        </div>
+
+        <!-- Card 3 -->
+        <div onclick="showLearnModal('strategi')" style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:16px;padding:24px;cursor:pointer;transition:border-color 0.2s,transform 0.2s" onmouseover="this.style.borderColor='var(--gold-dim)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-subtle)';this.style.transform='translateY(0)'">
+          <div style="font-size:36px;margin-bottom:12px">♟️</div>
+          <h3 style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Strategi Trading</h3>
+          <p style="font-size:12px;color:var(--text-muted);line-height:1.6">Day trading, swing trading, buy & hold — kelebihan, kekurangan, dan cocok untuk siapa.</p>
+          <div style="margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--gold)">▶ Baca Materi →</div>
+        </div>
+
+        <!-- Card 4 -->
+        <div onclick="showLearnModal('risiko')" style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:16px;padding:24px;cursor:pointer;transition:border-color 0.2s,transform 0.2s" onmouseover="this.style.borderColor='var(--gold-dim)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-subtle)';this.style.transform='translateY(0)'">
+          <div style="font-size:36px;margin-bottom:12px">🛡️</div>
+          <h3 style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Manajemen Risiko</h3>
+          <p style="font-size:12px;color:var(--text-muted);line-height:1.6">Stop loss, diversifikasi portofolio, dan cara melindungi modal dari kerugian besar.</p>
+          <div style="margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--gold)">▶ Baca Materi →</div>
+        </div>
+
+        <!-- Card 5 -->
+        <div onclick="showLearnModal('psikologi')" style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:16px;padding:24px;cursor:pointer;transition:border-color 0.2s,transform 0.2s" onmouseover="this.style.borderColor='var(--gold-dim)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='var(--border-subtle)';this.style.transform='translateY(0)'">
+          <div style="font-size:36px;margin-bottom:12px">🧠</div>
+          <h3 style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text-primary);margin-bottom:6px">Psikologi Trading</h3>
+          <p style="font-size:12px;color:var(--text-muted);line-height:1.6">Fear & greed, FOMO, bias kognitif, dan cara mengendalikan emosi saat trading.</p>
+          <div style="margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--gold)">▶ Baca Materi →</div>
+        </div>
+
+        <!-- Card 6 — Ask AI -->
+        <div onclick="openAIMentor()" style="background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(0,229,255,0.1));border:1px solid var(--gold-dim);border-radius:16px;padding:24px;cursor:pointer;transition:transform 0.2s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+          <div style="font-size:36px;margin-bottom:12px">🤖</div>
+          <h3 style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--gold);margin-bottom:6px">Tanya AI Mentor</h3>
+          <p style="font-size:12px;color:var(--text-muted);line-height:1.6">Punya pertanyaan spesifik? Tanyakan langsung ke AI Trading Mentor kami — gratis!</p>
+          <div style="margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--cyan)">▶ Chat Sekarang →</div>
+        </div>
+
+      </div>
+    </div>
+    <!-- END LEARN VIEW -->
+
+    <!-- ═══ BERITA KEUANGAN VIEW ═══ -->
+    <div class="panel-view" id="berita-view" style="padding:20px;width:100%;max-width:1100px;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">📰 BERITA KEUANGAN</div>
+        <h2 style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text-primary)">Financial News & Market Intelligence</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:4px">Real-time · Indonesia · Global · Makroekonomi</p>
+      </div>
+
+      <!-- Filter kategori -->
+      <div id="berita-filter-bar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;justify-content:center"></div>
+
+      <!-- Grid berita -->
+      <div id="berita-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px">
+        <div style="text-align:center;padding:32px;color:var(--text-muted);grid-column:1/-1">⏳ Memuat berita terkini…</div>
+      </div>
+
+      <!-- Footer sumber -->
+      <div style="margin-top:20px;text-align:center;font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:0.08em">
+        Sumber: CNBC Indonesia · Bloomberg · Reuters · Investing.com · TradingEconomics · Yahoo Finance · Bank Indonesia
+      </div>
+    </div>
+    <!-- END BERITA KEUANGAN VIEW -->
+
+    <!-- ═══ COMMUNITY VIEW ═══ -->
+    <div class="panel-view" id="community-view" style="padding:20px;max-width:780px;margin:0 auto;width:100%">
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px">💬 KOMUNITAS TRADER</div>
+        <h2 style="font-family:var(--font-display);font-size:22px;font-weight:700;color:var(--text-primary)">Analisis & Diskusi</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:4px">Share analisis, ide trading, dan diskusi dengan sesama trader UNISBA</p>
+      </div>
+
+      <!-- Post input -->
+      <div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:16px;padding:16px;margin-bottom:20px">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <div style="width:36px;height:36px;border-radius:10px;background:rgba(105,240,174,0.15);color:var(--green);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:13px;font-weight:700;flex-shrink:0" id="community-avatar">?</div>
+          <div style="flex:1">
+            <textarea id="community-input" placeholder="Bagikan analisis kamu… (contoh: KDOK breakout dari resistance 27000! Target 29000 🚀)" style="width:100%;background:var(--bg-deep);border:1px solid var(--border-subtle);border-radius:10px;padding:10px 12px;color:var(--text-primary);font-size:12px;resize:none;height:80px;outline:none;font-family:var(--font-body);line-height:1.5"></textarea>
+            <div style="display:flex;justify-content:flex-end;margin-top:8px;gap:8px">
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:6px">
+                <span>Saham aktif:</span>
+                <span style="color:var(--gold)" id="community-active-stock">—</span>
+              </div>
+              <button onclick="postCommunity()" style="padding:7px 18px;border-radius:8px;background:linear-gradient(135deg,rgba(0,229,255,0.2),rgba(212,175,55,0.2));border:1px solid var(--border-cyan);color:var(--cyan);font-family:var(--font-mono);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:0.05em">POST →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feed -->
+      <div id="community-feed" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+    <!-- END COMMUNITY VIEW -->
+
+
+
+  </div>
+  <!-- END dashboard-content -->
+</div>
+<!-- END dashboard-page -->
+
+<!-- Scripts -->
+<script src="firebase.js"></script>
+<script src="script.js"></script>
+<script src="market-engine.js"></script>
+<script src="upgrades.js"></script>
+<script src="fixes.js"></script>
+<script src="macro-engine.js"></script>    <!-- Kurs USD/IDR real + pengaruh ke saham -->
+<script src="real-market.js"></script>     <!-- Saham bank Indonesia real + berita nyata -->
+<script src="bank-market.js"></script>   <!-- Tab Bank Indonesia: beli/jual saham bank nyata -->
+<script src="berita-engine.js"></script> <!-- Berita Keuangan: Indonesia, Global, BI, Geopolitik -->
+
+<script>
+  // ─── ALWAYS-ON PRICE ENGINE ───────────────────────────
+  // Pastikan ticker landing & auth terus update meski belum login
+  // Price loop sendiri sudah jalan di script.js sejak DOMContentLoaded,
+  // tapi tampilan landing tidak refresh — ini fixnya.
+  (function keepLandingTickerAlive() {
+    // Refresh ticker landing setiap 2 detik (sama dengan PRICE_UPDATE_MS)
+    setInterval(() => {
+      if (typeof renderTicker === 'function') renderTicker();
+    }, 2000);
+
+    // Refresh news loop di landing juga
+    setInterval(() => {
+      if (typeof fireNews === 'function') {
+        // Hanya fire news jika belum login (di dashboard sudah ada loopnya)
+        const dash = document.getElementById('dashboard-page');
+        const isOnDashboard = dash && dash.style.display !== 'none';
+        if (!isOnDashboard) fireNews();
+      }
+    }, 15000);
+  })();
+</script>
+
+<!-- Mobile bottom trade bar -->
+<div class="mobile-trade-bar" id="mobile-trade-bar">
+  <div class="mobile-price">
+    <div class="mobile-price-val" id="mobile-price-val">Rp 0</div>
+    <div class="mobile-price-chg up" id="mobile-price-chg">+0.00%</div>
+  </div>
+  <button class="btn-mobile-stocks" onclick="openMobileStockSheet()">📋 Saham</button>
+  <button class="btn-mobile-sell" onclick="openMobileTradeModal('sell')">Jual</button>
+  <button class="btn-mobile-buy" onclick="openMobileTradeModal('buy')">Beli</button>
+</div>
+
+<!-- Mobile Stock Sheet -->
+<div class="mobile-sheet-overlay" id="mobile-stock-sheet" onclick="e => { if(e.target===this) closeMobileStockSheet(); }">
+  <div class="mobile-sheet">
+    <div class="mobile-sheet-header">
+      <span class="mobile-sheet-title">Pilih Saham</span>
+      <button class="mobile-sheet-close" onclick="closeMobileStockSheet()">✕</button>
+    </div>
+    <div class="mobile-sheet-body" id="mobile-stock-list"></div>
+  </div>
+</div>
+
+<!-- Mobile Trade Modal -->
+<div class="mobile-sheet-overlay" id="mobile-trade-modal-overlay" onclick="if(event.target===this) closeMobileTradeModal()">
+  <div class="mobile-trade-modal" id="mobile-trade-modal">
+    <!-- content injected by JS -->
+  </div>
+</div>
+
+<script>
+  // Extra binding for landing "Masuk" button
+  document.getElementById('btn-go-auth-login')?.addEventListener('click', () => {
+    document.getElementById('btn-enter-market')?.click();
+  });
+
+  // Timeframe buttons — handled by upgrades.js switchTimeframe()
+  // Just set active class visually here as fallback
+  document.querySelectorAll('.tf-btn').forEach(btn => {
+    if (!btn.dataset.tf) return; // skip non-tf buttons
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      // switchTimeframe called by onclick in upgrades.js
+    });
+  });
+
+  // Mobile bar: show only on trading tab, hide on portfolio/leaderboard
+  document.querySelectorAll('.nav-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const bar = document.getElementById('mobile-trade-bar');
+      if (bar) bar.style.display = btn.dataset.tab === 'trade' ? 'flex' : 'none';
+      // Community tab
+      if (btn.dataset.tab === 'community') {
+        // Update avatar
+        const avatar = document.getElementById('community-avatar');
+        if (avatar && typeof state !== 'undefined') {
+          const name = state.user?.displayName || state.user?.email?.split('@')[0] || '?';
+          avatar.textContent = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+        }
+        // Update active stock label
+        const stockLabel = document.getElementById('community-active-stock');
+        if (stockLabel && typeof state !== 'undefined') stockLabel.textContent = state.activeStock || '—';
+        // Re-render feed
+        if (typeof renderCommunityFeed === 'function') renderCommunityFeed();
+      }
+    });
+  });
+
+  // Close mobile sheets on overlay click
+  document.getElementById('mobile-stock-sheet')?.addEventListener('click', function(e) {
+    if (e.target === this) closeMobileStockSheet();
+  });
+</script>
+<!-- Floating AI Mentor Button -->
+<button id="ai-mentor-fab" onclick="openAIMentor()" style="
+  position:fixed;bottom:20px;right:20px;z-index:9998;
+  width:54px;height:54px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),var(--cyan));
+  border:none;cursor:pointer;font-size:24px;
+  box-shadow:0 4px 24px rgba(212,175,55,0.4);
+  display:none;align-items:center;justify-content:center;
+  transition:transform 0.2s;
+" title="AI Trading Mentor" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">🤖</button>
+
+<script>
+  // Show FAB only when on dashboard
+  const _observer = new MutationObserver(() => {
+    const dash = document.getElementById('dashboard-page');
+    const fab  = document.getElementById('ai-mentor-fab');
+    if (fab && dash) fab.style.display = (dash.style.display !== 'none') ? 'flex' : 'none';
+  });
+  _observer.observe(document.body, { subtree: true, attributeFilter: ['style', 'class'] });
+</script>
+
+
+<script>
+  // Populate alert stock selector
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const sel = document.getElementById('alert-stock-sel');
+      if (sel && typeof STOCKS !== 'undefined') {
+        STOCKS.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s.id;
+          opt.textContent = s.id + ' — ' + s.name;
+          sel.appendChild(opt);
+        });
+      }
+    }, 1500);
+  });
+</script>
+
+</body>
+</html>
